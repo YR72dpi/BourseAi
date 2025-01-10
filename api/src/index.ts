@@ -1,14 +1,16 @@
 import express, { json, Request, Response } from "express";
 import dotenv from "dotenv";
-import { getUseFulLinks, isGoodToInvest, makeSummary, makeTable } from "./IA/gpt";
+import { getUseFulLinks, isGoodToInvest, makeSummary, makeTable, purgeConv, setPageText, setRawPageText } from "./IA/gpt";
 import { ExtractText } from "./utils/ExtractText";
 // import { PcSave } from "./IA/pinecone";
 import crypto from 'crypto';
+var cors = require('cors')
 
 dotenv.config();
 
 const app = express();
 app.use(json());
+app.use(cors());
 
 app.post("/", async (request: Request, response: Response) => {
     const shareUrl = request.body.shareUrl;
@@ -31,24 +33,29 @@ app.post("/", async (request: Request, response: Response) => {
     }
 
     if (pageHtmlBodyText != "") {
+        // set les different version de la page
+        setRawPageText(pageHtmlBodyTextRaw)
+        setPageText(pageHtmlBodyText)
+
         // enregistrer dans pinecone
         // await PcSave(pageHtmlBodyText, recordId)
         // faire le résumé
-        const summary = await makeSummary(pageHtmlBodyText)
+        const summary = await makeSummary()
         // enregistrer le resumé dans pinecone
         // if (summary) await PcSave(summary, recordId)
         // faire un tableau html
-        const table = await makeTable(pageHtmlBodyText)
+        const table = await makeTable()
         // enregistrer le tableau dans pinecone
         // if (table) await PcSave(table, recordId)
 
-        const goodToInvest = await isGoodToInvest(pageHtmlBodyText)
-        const useFulLink = await getUseFulLinks(pageHtmlBodyTextRaw)
+        const goodToInvest = await isGoodToInvest()
+        const useFulLink = await getUseFulLinks()
 
+        purgeConv()
         console.log("Recherche : FIN")
 
         response.json({
-            // url: shareUrl,
+            url: shareUrl,
             result: {
                 invest: goodToInvest,
                 summary: summary,

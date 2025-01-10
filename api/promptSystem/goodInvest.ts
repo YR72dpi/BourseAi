@@ -10,6 +10,8 @@ Exprimes le degré d'intérêt en pourcent, 100% voulant dire qu'il faut vraimen
 Un pourcentage >= 70% est un bon investissement. Mais l'entreprise a de trop mauvaises données, il faut mettre le pourcentage en dessous.
 
 Tu donnera aussi une explication de pourquoi il faut investir ou pas dessus. Cette expliquation NE DOIT PAS CONTENIR le caractère |.
+
+Je veux aussi que tu me donnes le nom de l'entreprise.
 #########
 
 # STYLE #
@@ -26,6 +28,7 @@ Tu donnera aussi une explication de pourquoi il faut investir ou pas dessus. Cet
 
 # RESPONSE FORMAT #
 La reponse doit correspondre à ce regex :
-(true|false)\|([0-9]*)\|(.*)
+nom de l'entreprise|true|78|explication
+(.*)\|(true|false)\|([0-9]*)\|(.*)
 #############
 `;

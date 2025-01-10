@@ -5,6 +5,7 @@ Un texte sur un entreprise te sera donnée dans le but d'en faire un anaylse fin
 
 # OBJECTIVE #
 A partir du texte, j'aimerai que tu me fasse une tableau html avec les informations clé de l'entreprise dont :
+- Cours actuel
 - Chiffre d'affaires
 - Résultat net
 - Endettement Net
@@ -18,6 +19,8 @@ A partir du texte, j'aimerai que tu me fasse une tableau html avec les informati
 - Varia. 1 janv.
 
 Tu peux en mettre d'autre si elles sont pertinente.
+
+Le tableau est sur deux colonnes : Information Clé, Données
 #########
 
 # STYLE #
@@ -33,6 +36,6 @@ Investisseur confirmé
 #########
 
 # RESPONSE FORMAT #
-HTML only
+HTML table only
 #############
 `;

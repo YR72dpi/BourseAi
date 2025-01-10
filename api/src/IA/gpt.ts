@@ -15,8 +15,45 @@ const openai = new OpenAI({
 });
 
 let conv: any[] = [];
+let rawPageText: string = ""
+let pageText: string = ""
 
-export async function makeSummary(rawPageText: string) {
+export function setRawPageText(rawPageTextGiven: string | null) {
+    if (rawPageTextGiven === null) {
+        rawPageTextGiven = rawPageText
+    } else {
+        rawPageText = rawPageTextGiven
+    }
+
+    conv.push({
+        role: "user",
+        content: "Page html brute : \n" + rawPageTextGiven
+    });
+}
+
+export function setPageText(pageTextGiven: string | null) {
+    if (pageTextGiven === null) {
+        pageTextGiven = pageText
+    } else {
+        rawPageText = pageTextGiven
+    }
+    conv.push({
+        role: "user",
+        content: "Texte de la page : \n" + pageTextGiven
+    });
+}
+
+export function resetConv() { 
+    conv = [] 
+    setPageText(null)
+    setRawPageText(null)
+}
+
+export function purgeConv() { 
+    conv = []
+}
+
+export async function makeSummary() {
 
     console.log("Demander à chatGPT de faire un resumé: DEBUT")
     try {
@@ -24,10 +61,6 @@ export async function makeSummary(rawPageText: string) {
             role: "system",
             content: MAKE_SUMMARY
         })
-        conv.push({
-            role: "user",
-            content: rawPageText
-        });
 
         const requestParam: ChatCompletionCreateParams = {
             model: process.env.GPT_MODEL as string,
@@ -44,26 +77,22 @@ export async function makeSummary(rawPageText: string) {
         });
 
         console.log("Demander à chatGPT de faire un resumé: FIN")
+        resetConv()
 
         return aiResponse
 
     } catch (error) {
         console.error('Erreur:', error);
     }
-
 }
 
-export async function makeTable(rawPageText: string) {
+export async function makeTable() {
     console.log("Demander à chatGPT de faire un tableau HTML: DEBUT")
     try {
         conv.push({
             role: "system",
             content: MAKE_TABLE
         })
-        conv.push({
-            role: "user",
-            content: rawPageText
-        });
 
         const requestParam: ChatCompletionCreateParams = {
             model: process.env.GPT_MODEL as string,
@@ -88,25 +117,23 @@ export async function makeTable(rawPageText: string) {
         });
 
         console.log("Demander à chatGPT de faire un tableau HTML: FIN")
+        resetConv()
 
         return aiResponse
 
     } catch (error) {
         console.error('Erreur:', error);
     }
+
 }
 
-export async function isGoodToInvest(rawPageText: string) {
+export async function isGoodToInvest() {
     console.log("Demander à chatGPT s'il faut investir: DEBUT")
     try {
         conv.push({
             role: "system",
             content: GOOD_INVEST
         })
-        conv.push({
-            role: "user",
-            content: rawPageText
-        });
 
         const requestParam: ChatCompletionCreateParams = {
             model: process.env.GPT_MODEL as string,
@@ -123,12 +150,14 @@ export async function isGoodToInvest(rawPageText: string) {
         });
 
         let returnObject = {
-            goodToInvest: aiResponse.split("|")[0] === "true" ? true : false,
-            gptCraze: parseInt(aiResponse.split("|")[1]),
-            why: aiResponse.split("|")[2]
+            companyName: aiResponse.split("|")[0],
+            goodToInvest: aiResponse.split("|")[1] === "true" ? true : false,
+            gptCraze: parseInt(aiResponse.split("|")[2]),
+            why: aiResponse.split("|")[3]
         }
 
         console.log("Demander à chatGPT s'il faut investir: FIN")
+        resetConv()
 
         return returnObject
 
@@ -137,17 +166,13 @@ export async function isGoodToInvest(rawPageText: string) {
     }
 }
 
-export async function getUseFulLinks(rawPageText: string) {
+export async function getUseFulLinks() {
     console.log("Demander les liens utils à chatGPT: DEBUT")
     try {
         conv.push({
             role: "system",
             content: GET_USEFUL_LINKS
         })
-        conv.push({
-            role: "user",
-            content: rawPageText
-        });
 
         const requestParam: ChatCompletionCreateParams = {
             model: process.env.GPT_MODEL as string,
@@ -159,7 +184,7 @@ export async function getUseFulLinks(rawPageText: string) {
 
         let aiResponse: string = response.choices[0].message.content as string;
         aiResponse = aiResponse
-        .replace(/```/gim, '')
+            .replace(/```/gim, '')
             .replace(/^json/gim, '')
             .replace(/\n/g, ' ')  // Remove newlines
             .replace(/\t/g, ' ')  // Remove tabs
@@ -174,7 +199,7 @@ export async function getUseFulLinks(rawPageText: string) {
         const returnObject = JSON.parse(aiResponse)
 
         console.log("Demander les liens utils à chatGPT: FIN")
-
+        resetConv()
         return returnObject
 
     } catch (error) {
