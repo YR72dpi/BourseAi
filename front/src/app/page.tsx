@@ -3,15 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 
 export interface ApiResponse {
+  url: string
   result: {
     invest: {
       companyName: string,
       goodToInvest: boolean;
-      gptCraze: number;
-      why: string;
+      craze: number;
+      whyFor: string;
+      whyNotFor: string;
     };
     summary: string;
     usefullLinks: {
@@ -24,7 +27,7 @@ export interface ApiResponse {
 
 
 export default function Home() {
-  const [inputValue, setInputValue] = useState("https://www.zonebourse.com/cours/action/STELLANTIS-N-V-117814143/"); // Pour stocker la valeur de l'input
+  const [inputValue, setInputValue] = useState(""); // Pour stocker la valeur de l'input
   const [apiResponse, setApiResponse] = useState<null|ApiResponse>(); // Pour stocker la réponse de l'API
   const [responseError, setResponseError] = useState<null|String>(); // Pour stocker la réponse de l'API
   const [loading, setLoading] = useState(false); // Pour gérer l'état de chargement
@@ -83,7 +86,7 @@ export default function Home() {
           {loading ? "Chargement..." : "Rechercher"}
         </Button>
       </div>
-      <ScrollArea className="w-full rounded-md border p-2">
+      <ScrollArea className="w-full h-[85vh] rounded-md border p-5 flex flex-col gap-5">
         {responseError ?? (
           <p>{responseError}</p>
         )}
@@ -91,27 +94,31 @@ export default function Home() {
         {apiResponse ? (
           <>
             <h1 className="text-4xl font-bold tracking-tight text-gray-900">
-              {apiResponse.result.invest.companyName}
+              {apiResponse.result.invest.companyName} 
+              <a href={apiResponse.url} className="text-3xl"> 🌐</a>
             </h1>
-            <p>{apiResponse.result.summary}</p>
+            <p className="mb-5 text-justify indent-2.5">{apiResponse.result.summary}</p>
             <Separator />
             <h2 className="text-3xl font-semibold text-gray-800 mt-4">
               Bon investissement : {apiResponse.result.invest.goodToInvest ? ("Oui ✅"): ("non ❌")}
             </h2>
-            <h3 className="text-2xl font-medium text-gray-700 mt-3">Pourquoi ?</h3>
-            <p>{apiResponse.result.invest.why}</p>
+            <p className="text-sm text-muted-foreground">GPT à estimé un score de de {apiResponse.result.invest.craze}%</p>
+            <h3 className="text-2xl font-medium text-gray-700 mt-3">Pourquoi investir ?</h3>
+            <p className="text-justify indent-2.5 ">{apiResponse.result.invest.whyFor}</p>
+            <h3 className="text-2xl font-medium text-gray-700 mt-3">Pourquoi ne pas investir ?</h3>
+            <p className="text-justify indent-2.5 mb-5">{apiResponse.result.invest.whyNotFor}</p>
             <Separator />
             <h2 className="text-3xl font-semibold text-gray-800 mt-4">Données clés</h2>
             <div
               dangerouslySetInnerHTML={{ __html: apiResponse.result.table }}
-              className="overflow-x-auto"
+              className="overflow-x-auto mb-5"
             ></div>
             <Separator />
             <h2 className="text-3xl font-semibold text-gray-800 mt-4">Liens utiles</h2>
             <ul>
             {apiResponse.result.usefullLinks.map((link, index) => (
               <li key={index}>
-                <a href={link.url} className="text-blue-500 hover:underline">
+                <a href={"https://www.zonebourse.com"+link.url} className="text-blue-500 hover:underline">
                   {link.textUrl}
                 </a>
               </li>
@@ -119,7 +126,35 @@ export default function Home() {
             </ul>
           </>
         ) : (
-          <div className="text-gray-500">Aucune donnée disponible</div>
+          loading && !responseError ? (
+            <div>
+            <Skeleton className="w-1/2 h-[40px] mb-5"/>
+            <Skeleton className="w-full h-[300px]"/>
+            <Separator />
+            <h2 className="text-3xl font-semibold text-gray-800 mt-4">
+              Bon investissement : <Skeleton className="w-1/4 h-[20px]" />
+            </h2>
+            <Skeleton className="text-sm text-muted-foreground" />
+            <h3 className="text-2xl font-medium text-gray-700 mt-3">Pourquoi investir ?</h3>
+            <Skeleton className="w-full h-[100px] " />
+            <h3 className="text-2xl font-medium text-gray-700 mt-3">Pourquoi ne pas investir ?</h3>
+            <Skeleton className="w-full h-[100px] mb-5" />
+            <Separator />
+            <h2 className="text-3xl font-semibold text-gray-800 mt-4">Données clés</h2>
+            <Skeleton className="w-full h-[500px]" />
+            <Separator />
+            <h2 className="text-3xl font-semibold text-gray-800 mt-4">Liens utiles</h2>
+            <Skeleton className="w-full h-[500px]" />
+          </div>
+          ) : (
+            !responseError ? (
+              <div>
+                <p>Entrez une url</p>
+              </div>
+            ) : (<></>)
+            
+          )
+          
         )}
       </ScrollArea>
     </div>
