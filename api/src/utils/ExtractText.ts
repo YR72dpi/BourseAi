@@ -23,9 +23,9 @@ export class ExtractText {
 
             let text = await response.text();
 
-            text = text
-            .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gim, "") // Supprime les balises <script> et leur contenu
-            .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gim, "") // Supprime les balises <style> et leur contenu
+            // text = text
+            // .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gim, "") // Supprime les balises <script> et leur contenu
+            // .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gim, "") // Supprime les balises <style> et leur contenu
 
             // Stocke le contenu brut dans la propriété rawHTML
             this.rawHTML = text;
@@ -50,6 +50,8 @@ export class ExtractText {
      */
     getCleanedText(): string {
         return this.rawHTML
+            .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gim, "") // Supprime les balises <script> et leur contenu
+            .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gim, "") // Supprime les balises <style> et leur contenu
             .replace(/<[^>]*>/g, " ") // Supprime toutes les balises HTML
             .replace(/\n/g, " ") // Supprime les sauts de ligne
             .replace(/\t/g, " ") // Supprime les tabulations

@@ -1,10 +1,11 @@
 import express, { json, Request, Response } from "express";
 import dotenv from "dotenv";
-import { getUseFulLinks, isGoodToInvest, makeSummary, makeTable, purgeConv, setPageText, setRawPageText } from "./IA/gpt";
 import { ExtractText } from "./utils/ExtractText";
 // import { PcSave } from "./IA/pinecone";
 import crypto from 'crypto';
-var cors = require('cors')
+import { GptManager } from "./IA/gpt";
+import cors from 'cors';
+import { Scrappe } from "./utils/scrappe";
 
 dotenv.config();
 
@@ -15,43 +16,47 @@ app.use(cors());
 app.post("/", async (request: Request, response: Response) => {
     const shareUrl = request.body.shareUrl;
     const recordId = crypto.createHash('md5').update(shareUrl).digest("hex")
-    console.log(recordId)
+
+    console.log("---------------------------------------------------")
+    console.log(shareUrl)
     console.log("Recherche : DEBUT")
 
-    // recup le contenu de la page
     const extractor = new ExtractText();
-    let pageHtmlBodyText = ""
-    let pageHtmlBodyTextRaw = ""
-
     try {
         await extractor.extractFromLink(shareUrl);
-        pageHtmlBodyText = extractor.getCleanedText();
-        pageHtmlBodyTextRaw = extractor.getRaw();
     } catch (error) {
         console.error(error);
         response.status(500).send();
     }
 
-    if (pageHtmlBodyText != "") {
-        // set les different version de la page
-        setRawPageText(pageHtmlBodyTextRaw)
-        setPageText(pageHtmlBodyText)
+    if (extractor.getRaw() != "") {
+        
+        const gpt = new GptManager(
+            extractor.getCleanedText(),
+            extractor.getRaw()
+        )
 
         // enregistrer dans pinecone
         // await PcSave(pageHtmlBodyText, recordId)
+
         // faire le résumé
-        const summary = await makeSummary()
+        const summary = await gpt.makeSummary()
+
         // enregistrer le resumé dans pinecone
         // if (summary) await PcSave(summary, recordId)
+
         // faire un tableau html
-        const table = await makeTable()
+        const table = await gpt.makeTable()
+
         // enregistrer le tableau dans pinecone
         // if (table) await PcSave(table, recordId)
 
-        const goodToInvest = await isGoodToInvest()
-        const useFulLink = await getUseFulLinks()
+        const goodToInvest = await gpt.isGoodToInvest()
 
-        purgeConv()
+        const scrappe = new Scrappe(extractor.getRaw());
+        const useFulLink = await scrappe.getUseFulLinks()
+
+        gpt.purgeConv()
         console.log("Recherche : FIN")
 
         response.json({
