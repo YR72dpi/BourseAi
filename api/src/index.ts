@@ -5,13 +5,17 @@ import { ExtractText } from "./utils/ExtractText";
 import crypto from 'crypto';
 import { GptManager } from "./IA/gpt";
 import cors from 'cors';
-import { Scrappe } from "./utils/scrappe";
+import { Scrappe } from "./utils/Scrappe";
 
 dotenv.config();
 
 const app = express();
 app.use(json());
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:3000', // Replace with your Next.js frontend URL
+    methods: ['GET', 'POST'], // Adjust based on your needs
+    credentials: true, // If you need to allow cookies
+  }));
 
 app.post("/", async (request: Request, response: Response) => {
     const shareUrl = request.body.shareUrl;
@@ -73,7 +77,7 @@ app.post("/", async (request: Request, response: Response) => {
 });
 
 app.listen(process.env.PORT, () => {
-    console.log("Server running at PORT: ", process.env.PORT);
+    console.log("Server running on: http://localhost:", process.env.PORT);
 }).on("error", (error) => {
     // gracefully handle error
     throw new Error(error.message);
