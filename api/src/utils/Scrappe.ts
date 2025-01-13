@@ -10,6 +10,7 @@ export class Scrappe {
     }
 
     async getUseFulLinks() {
+        console.log("Analyse pour avoir les liens utiles: DEBUT")
         try {
             // Vérifiez que this.rawPageText n'est pas vide
             if (!this.rawPageText) {
@@ -22,7 +23,6 @@ export class Scrappe {
 
             // Vérifiez combien de balises <a> existent
             const totalLinks = $(this.useFulLinksCssSelector);
-            console.log(totalLinks)
 
             // Extraire les liens et leur texte
             const links: { textUrl: string; url: string }[] = [];
@@ -34,7 +34,7 @@ export class Scrappe {
                 }
             });
 
-            console.log('Liens extraits :', links);
+            console.log("Analyse pour avoir les liens utiles: DEBUT")
 
             return links; // Retourne un tableau d'objets JSON
 
