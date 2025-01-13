@@ -35,3 +35,9 @@ Cet outil permet de convertir un lien vers une page d'action boursière sur **zo
 - Gain de temps significatif.
 - Présentation simplifiée des données complexes.
 - Facilite la prise de décision grâce à une recommandation synthétique.
+
+<i><small>Pas du chatGPT README</small></i>
+
+## Améliorer
+
+- Faire un chat pour poser des questions en utilisant pinecone
